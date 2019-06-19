@@ -53,8 +53,7 @@ const getRelatedKeywordsOfTopTenKeywords = async url => {
     } catch (error) {
         console.log(error);
     }
-}
-useAsync('http://www.naver.com');
+};
 
 module.exports = {
     getTopTen,
