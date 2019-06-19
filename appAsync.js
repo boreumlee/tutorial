@@ -3,16 +3,18 @@ const cheerio = require('cheerio');
 //1 - 10 순위 뽑기
 const getTopTen = async url => {
     try {
-        const list =[];
-        const $ = await rp({uri: url, transform: body => cheerio.load(body)});
-        $('div[class="ah_list PM_CL_realtimeKeyword_list_base"]').find('ul > li > a[class=ah_a]').each((index, element) => {
-            if(index < 10){
-              list.push($(element).attr('href'));
-            }
-        });
+        const list = [];
+        const $ = await rp({ uri: url, transform: body => cheerio.load(body) });
+        $('div[class="ah_list PM_CL_realtimeKeyword_list_base"]')
+            .find('ul > li > a[class=ah_a]')
+            .each((index, element) => {
+                if (index < 10) {
+                    list.push($(element).attr('href'));
+                }
+            });
         return list;
     } catch (error) {
-        console.log(error)
+        console.log(error);
     }
 };
 //각 순위 search페이지
