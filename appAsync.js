@@ -1,7 +1,7 @@
 const rp = require('request-promise');
 const cheerio = require('cheerio');
 //1 - 10 순위 뽑기
-const topTen = async (url) => {
+const getTopTen = async url => {
     try {
         const list =[];
         const $ = await rp({uri: url, transform: body => cheerio.load(body)});
@@ -15,14 +15,16 @@ const topTen = async (url) => {
         console.log(error)
     }
 };
-//각 순위 search페이지 
-const relUrl = list => {
-    return list.map( async (element) => {
-        return await rp({uri: element});  //return htmlString 
-    });
+//각 순위 search페이지
+const getSearchPageHTMLs = links => {
+    return Promise.all(
+        links.map(link => {
+            return rp({ uri: link }); //return htmlString
+        })
+    );
 };
-//연관검색어 
-const relations = async relUrl => {
+//연관검색어
+const getRelatedKeywords = async htmls => {
     try {
         const values = await Promise.all(relUrl);
         return values.map(ele => {
@@ -38,12 +40,12 @@ const relations = async relUrl => {
     }
 };
 
-const useAsync = async (url) => {
+const getRelatedKeywordsOfTopTenKeywords = async url => {
     try {
-        const list = await topTen(url);
-        const searchPage = await relUrl(list);
-        const relList = await relations(searchPage);
-        // console.log(relList);
+        const topTenLinks = await getTopTen(url);
+        const topTenHTMLs = await getSearchPageHTMLs(topTenLinks);
+        const relList = await getRelatedKeywords(topTenHTMLs);
+
         return relList;
     } catch (error) {
         console.log(error);
@@ -52,8 +54,8 @@ const useAsync = async (url) => {
 useAsync('http://www.naver.com');
 
 module.exports = {
-    topTen,
-    relUrl,
-    relations,
-    useAsync
+    getTopTen,
+    getSearchPageHTMLs,
+    getRelatedKeywords,
+    getRelatedKeywordsOfTopTenKeywords
 };
