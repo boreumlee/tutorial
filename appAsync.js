@@ -28,15 +28,16 @@ const getSearchPageHTMLs = links => {
 //연관검색어
 const getRelatedKeywords = async htmls => {
     try {
-        const values = await Promise.all(relUrl);
-        return values.map(ele => {
-            const $ = cheerio.load(ele);
-            const relation = []
-            $('ul[class=_related_keyword_ul]').find('li > a').each((index, element) => {
-              relation.push($(element).text());
-            })
-            return relation;
-          })    
+        return htmls.map(html => {
+            const $ = cheerio.load(html);
+            const relations = [];
+            $('ul[class=_related_keyword_ul]')
+                .find('li > a')
+                .each((index, element) => {
+                    relations.push($(element).text());
+                });
+            return relations;
+        });
     } catch (error) {
         console.log(error);
     }
