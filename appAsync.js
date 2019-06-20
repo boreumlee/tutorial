@@ -18,37 +18,33 @@ const getTopTen = async url => {
     }
 };
 //각 순위 search페이지
-const getSearchPageHTMLs = links => {
-    return Promise.all(
-        links.map(link => {
-            return rp({ uri: link }); //return htmlString
-        })
-    );
+const getSearchPageHTML = async link => {
+    const $ = await rp({ uri: link, transform: body => cheerio.load(body) });
+    return $.html();
 };
 //연관검색어
-const getRelatedKeywords = async htmls => {
-    try {
-        return htmls.map(html => {
-            const $ = cheerio.load(html);
-            const relations = [];
-            $('ul[class=_related_keyword_ul]')
-                .find('li > a')
-                .each((index, element) => {
-                    relations.push($(element).text());
-                });
-            return relations;
+const getRelatedKeyword = html => {
+    const $ = cheerio.load(html);
+    const relations = [];
+    $('ul[class=_related_keyword_ul]')
+        .find('li > a')
+        .each((index, element) => {
+            relations.push($(element).text());
         });
-    } catch (error) {
-        console.log(error);
-    }
+    return relations;
 };
 
 const getRelatedKeywordsOfTopTenKeywords = async url => {
     try {
         const topTenLinks = await getTopTen(url);
-        const topTenHTMLs = await getSearchPageHTMLs(topTenLinks);
-        const relList = await getRelatedKeywords(topTenHTMLs);
-
+        const topTenHTMLs = await Promise.all(
+            topTenLinks.map(async link => {
+                return await getSearchPageHTML(link);
+            }),
+        );
+        const relList = topTenHTMLs.map(html => {
+            return getRelatedKeyword(html);
+        });
         return relList;
     } catch (error) {
         console.log(error);
@@ -57,7 +53,7 @@ const getRelatedKeywordsOfTopTenKeywords = async url => {
 
 module.exports = {
     getTopTen,
-    getSearchPageHTMLs,
-    getRelatedKeywords,
-    getRelatedKeywordsOfTopTenKeywords
+    getSearchPageHTML,
+    getRelatedKeyword,
+    getRelatedKeywordsOfTopTenKeywords,
 };
