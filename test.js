@@ -1,8 +1,8 @@
 const {
     getTopTen,
-    getSearchPageHTMLs,
-    getRelatedKeywords,
-    getRelatedKeywordsOfTopTenKeywords
+    getSearchPageHTML,
+    getRelatedKeyword,
+    getRelatedKeywordsOfTopTenKeywords,
 } = require('./appAsync');
 const assert = require('chai').assert;
 
@@ -22,29 +22,41 @@ describe('naver 순위 연관검색어 함수 단위 테스트', () => {
             assert.lengthOf(result, 0);
         }).timeout(5000);
     });
-    // TODO: 함수 별로 테스트 만들기 (배열을 받아서 배열을 return 하는 구조 변경 필요할 수도)
-        // it('각 순위 페이지의 html list', async () => {
-        //     const list = await getTopTen('http://www.naver.com');
-        //     const result = await getSearchPageHTMLs(list);
-        //     console.log(result);
-        //     assert.isArray(result);
-        //     assert.lengthOf(result, 10);
-        // }).timeout(5000);
 
-        // it('연관검색어 list', async () => {
-        //     const list = await getTopTen('http://www.naver.com');
-        //     const html = await getSearchPageHTMLs(list);
-        //     const result = await getRelatedKeywords(html);
-        //     console.log(result);
-        //     assert.isArray(result);
-        //     assert.lengthOf(result, 10);
-        // }).timeout(5000);
+    describe('getSearchPageHTML', () => {
+        it('google페이지 html string', async () => {
+            const result = await getSearchPageHTML('http://www.google.com');
+            assert.isString(result);
+        }).timeout(5000);
+    });
+
+    describe('getRelatedKeyword', () => {
+        it('김주하 연관검색어', async () => {
+            const html = await getSearchPageHTML(
+                'https://search.naver.com/search.naver?where=nexearch&query=%EA%B9%80%EC%A3%BC%ED%95%98&sm=top_lve&ie=utf8',
+            );
+            const result = getRelatedKeyword(html);
+            console.log(result);
+            assert.isArray(result);
+            assert.lengthOf(result, 10);
+        }).timeout(5000);
+
+        it('`위메프 푸드 두번할인` 연관검색어 없음', async () => {
+            const html = await getSearchPageHTML(
+                'https://search.naver.com/search.naver?where=nexearch&query=%EC%9C%84%EB%A9%94%ED%94%84+%ED%91%B8%EB%93%9C+%EB%91%90%EB%B2%88%ED%95%A0%EC%9D%B8&sm=top_lve&ie=utf8',
+            );
+            const result = getRelatedKeyword(html);
+            console.log(result);
+            assert.isArray(result);
+            assert.lengthOf(result, 0);
+        }).timeout(5000);
+    });
 });
 
 describe('naver 순위 연관검색어 리스트', () => {
     it('연관검색어 list', async () => {
         const result = await getRelatedKeywordsOfTopTenKeywords(
-            'http://www.naver.com'
+            'http://www.naver.com',
         );
         console.log(result);
         assert.isArray(result);
