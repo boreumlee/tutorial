@@ -3,7 +3,7 @@ const cheerio = require('cheerio'); // Basically jQuery for node.js
 
 const list = [];
 
-const naver = rp({uri: 'http://www.naver.com', transform: body => cheerio.load(body)})
+const naver = url => rp({uri: url, transform: body => cheerio.load(body)})
     .then($ => {
       $('div[class="ah_list PM_CL_realtimeKeyword_list_base"]').find('ul > li > a[class=ah_a]').each((index, element) => {
         if(index < 10){
